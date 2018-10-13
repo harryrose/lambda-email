@@ -5,6 +5,8 @@ const AWS = require('aws-sdk'),
     fromAdddress = process.env.EMAIL_FROM,
     recapAction = process.env.RECAPTCHA_ACTION,
     reCaptchaSecret = process.env.RECAPTCHA_SECRET,
+    cors_allow_origin = process.env.CORS_ALLOW_ORIGIN,
+    cors_allow_methods= process.env.CORS_ALLOW_METHODS,
     recaptcha = require('./recaptcha'),
     recap = new recaptcha.Validator(reCaptchaSecret);
 
@@ -50,6 +52,9 @@ const response = function(status, body) {
     return {
         statusCode: status,
         body: JSON.stringify(body),
+        headers: {
+            "Access-Control-Allow-Origin": cors_allow_origin,
+        }
     };
 };
 
@@ -68,8 +73,7 @@ const okResponse = function(status, data) {
     });
 };
 
-exports.handler = function(event, context, callback) {
-    console.log(JSON.stringify(event));
+const handlePOST = function(event, callback) {
     const fromIP = event.requestContext.identity.sourceIp;
     const body = qs.parse(event.body);
 
@@ -101,25 +105,56 @@ exports.handler = function(event, context, callback) {
 
 
     recap.validate(recapAction, fromIP, recaptcha.getResponseFromObject(body))
-    .then( () => {
-        sendEmail(toAddress, fromAdddress, body.email, msg.subject, msg.body)
-        .then(function(){
-            callback(null, okResponse());
+        .then( () => {
+            sendEmail(toAddress, fromAdddress, body.email, msg.subject, msg.body)
+                .then(function(){
+                    callback(null, okResponse());
+                })
         })
-    })
-    .catch(function(err){
-        console.error("failed to send message: ", err);
-        if(err instanceof recaptcha.ConfigurationError) {
-            callback(null, errorResponse(500, "recaptcha failed due to configuration error"));
+        .catch(function(err){
+            console.error("failed to send message: ", err);
+            if(err instanceof recaptcha.ConfigurationError) {
+                callback(null, errorResponse(500, "recaptcha failed due to configuration error"));
+            }
+            else if (err instanceof recaptcha.InvalidAction) {
+                callback(null, errorResponse(400, "recaptcha failed due to invalid action"));
+            }
+            else if(err instanceof recaptcha.ValidationError){
+                callback(null, errorResponse(400), "recaptcha failed");
+            }
+            else {
+                callback(null, errorResponse(500, "error sending email"));
+            }
+        });
+};
+
+const handleOPTIONS = function(event, callback){
+    const response = {
+        statusCode: 200,
+        headers: {
+            Allow: cors_allow_methods,
+            "Access-Control-Allow-Methods": cors_allow_methods,
+            "Access-Control-Allow-Origin": cors_allow_origin,
+        },
+        multiValueHeaders: {
+            "Access-Control-Allow-Headers": ["Content-Type"]
         }
-        else if (err instanceof recaptcha.InvalidAction) {
-            callback(null, errorResponse(400, "recaptcha failed due to invalid action"));
-        }
-        else if(err instanceof recaptcha.ValidationError){
-            callback(null, errorResponse(400), "recaptcha failed");
-        }
-        else {
-            callback(null, errorResponse(500, "error sending email"));
-        }
-    });
+    }
+
+    callback(null, response);
+};
+
+exports.handler = function(event, context, callback) {
+    switch(event.httpMethod) {
+        case "POST":
+            handlePOST(event, callback);
+            return;
+
+        case "OPTIONS":
+            handleOPTIONS(event, callback);
+            return;
+
+        default:
+            callback(null, errorResponse(405, "method not allowed"));
+    }
 };
