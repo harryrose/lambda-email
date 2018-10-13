@@ -49,8 +49,8 @@ function handleResponse(expectedAction) {
             return
         }
 
-        if (parsedBody.action !== expectedAction) {
-            reject(new InvalidAction(expectedAction, parsedBody.action()));
+        if (expectedAction && parsedBody.action !== expectedAction) {
+            reject(new InvalidAction(expectedAction, parsedBody.action));
             return
         }
 
