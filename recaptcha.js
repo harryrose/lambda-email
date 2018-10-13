@@ -34,14 +34,7 @@ class InvalidAction extends ValidationError {
 }
 
 function getResponseFromObject(body) {
-    return new Promise((resolve, reject) => {
-        let key = body[responseKey];
-        if (key) {
-            resolve(key);
-        } else {
-            reject(new Error(responseKey + " was empty"));
-        }
-    });
+    return body[responseKey];
 }
 
 function handleResponse(expectedAction) {
@@ -84,6 +77,10 @@ class Validator {
 
         return rp(options)
             .then(handleResponse(action));
+    }
+
+    getResponseFromObject(body){
+        return getResponseFromObject(body);
     }
 }
 

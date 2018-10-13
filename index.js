@@ -99,7 +99,8 @@ exports.handler = function(event, context, callback) {
 
     const msg = buildMessage(fromIP, body.name, body.email, body.body);
 
-    recap.validate(recapAction, fromIP, recap.getResponseFromObject(body))
+
+    recap.validate(recapAction, fromIP, recaptcha.getResponseFromObject(body))
     .then( () => {
         sendEmail(toAddress, fromAdddress, body.email, msg.subject, msg.body)
         .then(function(){
