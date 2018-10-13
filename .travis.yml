@@ -9,7 +9,7 @@ deploy:
   region: eu-west-1
   role: arn:aws:iam::902482457600:role/Lambda_Email
   runtime: nodejs8.10
-  handler_name: index.handler
+  handler_name: handler
   timeout: 3
   memory_size: 128
   access_key_id: AKIAJOE3E2Z7GQZGZ3WQ
