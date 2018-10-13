@@ -1,0 +1,20 @@
+language: node_js
+node_js: '8.10'
+cache:
+  directories:
+  - node_modules
+deploy:
+  provider: lambda
+  function_name: email
+  region: eu-west-1
+  role: arn:aws:iam::902482457600:role/Lambda_Email
+  runtime: nodejs8.10
+  handler_name: index.handler
+  timeout: 3
+  memory_size: 128
+  access_key_id: AKIAJOE3E2Z7GQZGZ3WQ
+  secret_access_key:
+    secure: NCoiDiQJF8+3a/9/XFzI9I+QpzJDHBkYp7pECGhdN6S8hP0YDm6UXp0y+VwFDyQ+d6/0HL57I/Num9A9fT3xM6qr+UHg5eV2lWFakpZkAMNVw+cz4zO5Fbn7ZLRv09Ty+A81nan2ZzYG45dvgfD3TTUUToTTC0YtqvCLOl45Yjuzh0MecF9F4e+siHOiiGGmbPYLPXJzXM9f6bKYdw2Ko/85o1Say/eogjCCg9w55RDLI3MfjbsO+5M2wzTW9nDMGFNGGeFlzKs+aKVIUhWwJPOQg3MiuCsMKVD34czwimr1uNfuxzUzNR4rvcvKMNVGBaw3h1We4iJTp2/TbS3Vn6q133i3lnuDDbmXLy1klKovgFRxB7rN9vqwOsLC53iIciMH62gk9nXePw7flbQKLdf+b/f+DQp31oH5/ZNCiPcL3tzUQI6bBdPY2dsoKOQJMgTqQphYhp3S3qbDldoXrFVG74ifgHVs/7ePnDgqseh5vU6mGDiSwORNH8EmyIuAdW2i3HR72/ch99VCV18IAS9XZJqZypMxrqDx+HQE79Bt6IiKEwhSGPf9c852p3FJmlaL6fmyHfufgyoTpphqz3EnynmtbL6k3u9OuO/1wlhuh7h/xunw+LDY9zOCoSwtiAZuiTa9ZUxLQyIqAbRAeDrTS7leoRqrhjigP0DynyY=
+  on:
+    repo: harryrose/lambda-email
+    branch: master
